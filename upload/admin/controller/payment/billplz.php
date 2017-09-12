@@ -1,215 +1,197 @@
 <?php
+
 /**
  * Billplz OpenCart Plugin
  * 
  * @package Payment Gateway
- * @author Wanzul-Hosting.com <sales@wanzul-hosting.com>
- * @version 2.0
+ * @author Wan Zulkarnain <wan@billplz.com>
+ * @version 3.0
  */
-//mid as apikey vkey as collection id
-class ControllerPaymentBillplz extends Controller {
-	private $error = array();
 
-	public function index() {
-		$this->load->language('payment/billplz');
+class ControllerPaymentBillplz extends Controller
+{
 
-		$this->document->setTitle($this->language->get('heading_title'));
+    private $error = array();
 
-		$this->load->model('setting/setting');
+    public function index()
+    {
+        $this->load->language('payment/billplz');
 
-		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validate()) {
-			$this->model_setting_setting->editSetting('billplz', $this->request->post);
+        $this->document->setTitle($this->language->get('heading_title'));
 
-			$this->session->data['success'] = $this->language->get('text_success');
+        $this->load->model('setting/setting');
 
-			$this->response->redirect($this->url->link('extension/payment', 'token=' . $this->session->data['token'], 'SSL'));
-		}
+        if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validate()) {
+            $this->model_setting_setting->editSetting('billplz', $this->request->post);
 
-		$data['heading_title'] = $this->language->get('heading_title');
-		
-		$data['text_edit'] = $this->language->get('text_edit');
-		$data['text_enabled'] = $this->language->get('text_enabled');
-		$data['text_disabled'] = $this->language->get('text_disabled');
-		$data['text_all_zones'] = $this->language->get('text_all_zones');
-		$data['text_yes'] = $this->language->get('text_yes');
-		$data['text_no'] = $this->language->get('text_no');
+            $this->session->data['success'] = $this->language->get('text_success');
 
-		$data['entry_mid'] = $this->language->get('entry_mid');
-		$data['entry_vkey'] = $this->language->get('entry_vkey');
-		$data['entry_xsign'] = $this->language->get('entry_xsign');
-		$data['entry_host'] = $this->language->get('entry_host');
-		$data['entry_minlimit'] = $this->language->get('entry_minlimit');
-		$data['entry_delivery'] = $this->language->get('entry_delivery');
-		$data['entry_order_status'] = $this->language->get('entry_order_status');
-		$data['entry_completed_status'] = $this->language->get('entry_completed_status');
-		$data['entry_pending_status'] = $this->language->get('entry_pending_status');
-		$data['entry_failed_status'] = $this->language->get('entry_failed_status');
-		$data['entry_geo_zone'] = $this->language->get('entry_geo_zone');
-		$data['entry_status'] = $this->language->get('entry_status');
-		$data['entry_sort_order'] = $this->language->get('entry_sort_order');
-
-		$data['help_vkey'] = $this->language->get('help_vkey');
-		$data['help_xsign'] = $this->language->get('help_xsign');
-		$data['help_minlimit'] = $this->language->get('help_minlimit');
-
-		$data['button_save'] = $this->language->get('button_save');
-		$data['button_cancel'] = $this->language->get('button_cancel');
-
-		if (isset($this->error['warning'])) {
-			$data['error_warning'] = $this->error['warning'];
-		} else {
-			$data['error_warning'] = '';
-		}
-
-		if (isset($this->error['mid'])) {
-			$data['error_mid'] = $this->error['mid'];
-		} else {
-			$data['error_mid'] = '';
-		}
-
-		if (isset($this->error['vkey'])) {
-			$data['error_vkey'] = $this->error['vkey'];
-		} else {
-			$data['error_vkey'] = '';
-		}
-		
-		if (isset($this->error['xsign'])) {
-            $data['error_xsign'] = $this->error['xsign'];
-        } else {
-            $data['error_xsign'] = '';
+            $this->response->redirect($this->url->link('extension/payment', 'token=' . $this->session->data['token'], 'SSL'));
         }
 
-		$data['breadcrumbs'] = array();
+        $data['heading_title'] = $this->language->get('heading_title');
 
-		$data['breadcrumbs'][] = array(
-			'text' => $this->language->get('text_home'),
-			'href' => $this->url->link('common/dashboard', 'token=' . $this->session->data['token'], 'SSL')
-		);
+        $data['text_edit'] = $this->language->get('text_edit');
+        $data['text_enabled'] = $this->language->get('text_enabled');
+        $data['text_disabled'] = $this->language->get('text_disabled');
+        $data['text_all_zones'] = $this->language->get('text_all_zones');
+        $data['text_yes'] = $this->language->get('text_yes');
+        $data['text_no'] = $this->language->get('text_no');
 
-		$data['breadcrumbs'][] = array(
-			'text' => $this->language->get('text_payment'),
-			'href' => $this->url->link('extension/payment', 'token=' . $this->session->data['token'], 'SSL')
-		);
+        $data['billplz_api_key'] = $this->language->get('billplz_api_key');
+        $data['billplz_collection_id'] = $this->language->get('billplz_collection_id');
+        $data['billplz_x_signature'] = $this->language->get('billplz_x_signature');
+        $data['entry_minlimit'] = $this->language->get('entry_minlimit');
+        $data['entry_delivery'] = $this->language->get('entry_delivery');
+        $data['entry_order_status'] = $this->language->get('entry_order_status');
+        $data['entry_completed_status'] = $this->language->get('entry_completed_status');
+        $data['entry_pending_status'] = $this->language->get('entry_pending_status');
+        $data['entry_failed_status'] = $this->language->get('entry_failed_status');
+        $data['entry_geo_zone'] = $this->language->get('entry_geo_zone');
+        $data['entry_status'] = $this->language->get('entry_status');
+        $data['entry_sort_order'] = $this->language->get('entry_sort_order');
 
-		$data['breadcrumbs'][] = array(
-			'text' => $this->language->get('heading_title'),
-			'href' => $this->url->link('payment/billplz', 'token=' . $this->session->data['token'], 'SSL')
-		);
+        $data['help_api_key'] = $this->language->get('help_api_key');
+        $data['help_x_signature'] = $this->language->get('help_x_signature');
+        $data['help_minlimit'] = $this->language->get('help_minlimit');
 
-		$data['action'] = $this->url->link('payment/billplz', 'token=' . $this->session->data['token'], 'SSL');
+        $data['button_save'] = $this->language->get('button_save');
+        $data['button_cancel'] = $this->language->get('button_cancel');
 
-		$data['cancel'] = $this->url->link('extension/payment', 'token=' . $this->session->data['token'], 'SSL');
-
-		if (isset($this->request->post['billplz_mid'])) {
-			$data['billplz_mid'] = $this->request->post['billplz_mid'];
-		} else {
-			$data['billplz_mid'] = $this->config->get('billplz_mid');
-		}
-
-		if (isset($this->request->post['billplz_vkey'])) {
-			$data['billplz_vkey'] = $this->request->post['billplz_vkey'];
-		} else {
-			$data['billplz_vkey'] = $this->config->get('billplz_vkey');
-		}
-		
-		if (isset($this->request->post['billplz_xsign'])) {
-            $data['billplz_xsign'] = $this->request->post['billplz_xsign'];
+        if (isset($this->error['warning'])) {
+            $data['error_warning'] = $this->error['warning'];
         } else {
-            $data['billplz_xsign'] = $this->config->get('billplz_xsign');
+            $data['error_warning'] = '';
         }
-		
-		if (isset($this->request->post['billplz_sandbox'])) {
-			$data['billplz_sandbox'] = $this->request->post['billplz_sandbox'];
-		} else {
-			$data['billplz_sandbox'] = $this->config->get('billplz_sandbox');
-		}
-		
-		if (isset($this->request->post['billplz_delivery'])) {
-			$data['billplz_delivery'] = $this->request->post['billplz_delivery'];
-		} else {
-			$data['billplz_delivery'] = $this->config->get('billplz_delivery');
-		}
-		
-		if (isset($this->request->post['billplz_minlimit'])) {
-			$data['billplz_minlimit'] = $this->request->post['billplz_minlimit'];
-		} else {
-			$data['billplz_minlimit'] = $this->config->get('billplz_minlimit');
-		}
 
-		if (isset($this->request->post['billplz_order_status_id'])) {
-			$data['billplz_order_status_id'] = $this->request->post['billplz_order_status_id'];
-		} else {
-			$data['billplz_order_status_id'] = $this->config->get('billplz_order_status_id');
-		}
-		
-		if (isset($this->request->post['billplz_completed_status_id'])) {
-			$data['billplz_completed_status_id'] = $this->request->post['billplz_completed_status_id'];
-		} else {
-			$data['billplz_completed_status_id'] = $this->config->get('billplz_completed_status_id');
-		}
-		
-		if (isset($this->request->post['billplz_pending_status_id'])) {
-			$data['billplz_pending_status_id'] = $this->request->post['billplz_pending_status_id'];
-		} else {
-			$data['billplz_pending_status_id'] = $this->config->get('billplz_pending_status_id');
-		}
-		
-		if (isset($this->request->post['billplz_failed_status_id'])) {
-			$data['billplz_failed_status_id'] = $this->request->post['billplz_failed_status_id'];
-		} else {
-			$data['billplz_failed_status_id'] = $this->config->get('billplz_failed_status_id');
-		}
+        if (isset($this->error['api_key'])) {
+            $data['error_api_key'] = $this->error['api_key'];
+        } else {
+            $data['error_api_key'] = '';
+        }
 
-		$this->load->model('localisation/order_status');
+        if (isset($this->error['x_signature'])) {
+            $data['error_x_signature'] = $this->error['x_signature'];
+        } else {
+            $data['error_x_signature'] = '';
+        }
 
-		$data['order_statuses'] = $this->model_localisation_order_status->getOrderStatuses();
+        $data['breadcrumbs'] = array();
 
-		if (isset($this->request->post['billplz_geo_zone_id'])) {
-			$data['billplz_geo_zone_id'] = $this->request->post['billplz_geo_zone_id'];
-		} else {
-			$data['billplz_geo_zone_id'] = $this->config->get('billplz_geo_zone_id');
-		}
+        $data['breadcrumbs'][] = array(
+            'text' => $this->language->get('text_home'),
+            'href' => $this->url->link('common/dashboard', 'token=' . $this->session->data['token'], 'SSL')
+        );
 
-		$this->load->model('localisation/geo_zone');
+        $data['breadcrumbs'][] = array(
+            'text' => $this->language->get('text_payment'),
+            'href' => $this->url->link('extension/payment', 'token=' . $this->session->data['token'], 'SSL')
+        );
 
-		$data['geo_zones'] = $this->model_localisation_geo_zone->getGeoZones();
+        $data['breadcrumbs'][] = array(
+            'text' => $this->language->get('heading_title'),
+            'href' => $this->url->link('payment/billplz', 'token=' . $this->session->data['token'], 'SSL')
+        );
 
-		if (isset($this->request->post['billplz_status'])) {
-			$data['billplz_status'] = $this->request->post['billplz_status'];
-		} else {
-			$data['billplz_status'] = $this->config->get('billplz_status');
-		}
+        $data['action'] = $this->url->link('payment/billplz', 'token=' . $this->session->data['token'], 'SSL');
 
-		if (isset($this->request->post['billplz_sort_order'])) {
-			$data['billplz_sort_order'] = $this->request->post['billplz_sort_order'];
-		} else {
-			$data['billplz_sort_order'] = $this->config->get('billplz_sort_order');
-		}
-		
-		$data['header'] = $this->load->controller('common/header');
-		$data['column_left'] = $this->load->controller('common/column_left');
-		$data['footer'] = $this->load->controller('common/footer');
+        $data['cancel'] = $this->url->link('extension/payment', 'token=' . $this->session->data['token'], 'SSL');
 
-		$this->response->setOutput($this->load->view('payment/billplz.tpl', $data));
-	}
+        if (isset($this->request->post['billplz_api_key_value'])) {
+            $data['billplz_api_key_value'] = $this->request->post['billplz_api_key_value'];
+        } else {
+            $data['billplz_api_key_value'] = $this->config->get('billplz_api_key_value');
+        }
 
-	protected function validate() {
-		if (!$this->user->hasPermission('modify', 'payment/billplz')) {
-			$this->error['warning'] = $this->language->get('error_permission');
-		}
+        if (isset($this->request->post['billplz_collection_id_value'])) {
+            $data['billplz_collection_id_value'] = $this->request->post['billplz_collection_id_value'];
+        } else {
+            $data['billplz_collection_id_value'] = $this->config->get('billplz_collection_id_value');
+        }
 
-		if (!$this->request->post['billplz_mid']) {
-			$this->error['mid'] = $this->language->get('error_mid');
-		}
+        if (isset($this->request->post['billplz_x_signature_value'])) {
+            $data['billplz_x_signature_value'] = $this->request->post['billplz_x_signature_value'];
+        } else {
+            $data['billplz_x_signature_value'] = $this->config->get('billplz_x_signature_value');
+        }
 
-		if (!$this->request->post['billplz_vkey']) {
-			$this->error['vkey'] = $this->language->get('error_vkey');
-		}
-		
-		if (!$this->request->post['billplz_xsign']) {
-			$this->error['xsign'] = $this->language->get('error_xsign');
-		}
+        if (isset($this->request->post['billplz_delivery'])) {
+            $data['billplz_delivery'] = $this->request->post['billplz_delivery'];
+        } else {
+            $data['billplz_delivery'] = $this->config->get('billplz_delivery');
+        }
 
-		return !$this->error;
-	}
+        if (isset($this->request->post['billplz_minlimit'])) {
+            $data['billplz_minlimit'] = $this->request->post['billplz_minlimit'];
+        } else {
+            $data['billplz_minlimit'] = $this->config->get('billplz_minlimit');
+        }
+
+        if (isset($this->request->post['billplz_completed_status_id'])) {
+            $data['billplz_completed_status_id'] = $this->request->post['billplz_completed_status_id'];
+        } else {
+            $data['billplz_completed_status_id'] = $this->config->get('billplz_completed_status_id');
+        }
+
+        if (isset($this->request->post['billplz_pending_status_id'])) {
+            $data['billplz_pending_status_id'] = $this->request->post['billplz_pending_status_id'];
+        } else {
+            $data['billplz_pending_status_id'] = $this->config->get('billplz_pending_status_id');
+        }
+
+        if (isset($this->request->post['billplz_failed_status_id'])) {
+            $data['billplz_failed_status_id'] = $this->request->post['billplz_failed_status_id'];
+        } else {
+            $data['billplz_failed_status_id'] = $this->config->get('billplz_failed_status_id');
+        }
+
+        $this->load->model('localisation/order_status');
+
+        $data['order_statuses'] = $this->model_localisation_order_status->getOrderStatuses();
+
+        if (isset($this->request->post['billplz_geo_zone_id'])) {
+            $data['billplz_geo_zone_id'] = $this->request->post['billplz_geo_zone_id'];
+        } else {
+            $data['billplz_geo_zone_id'] = $this->config->get('billplz_geo_zone_id');
+        }
+
+        $this->load->model('localisation/geo_zone');
+
+        $data['geo_zones'] = $this->model_localisation_geo_zone->getGeoZones();
+
+        if (isset($this->request->post['billplz_status'])) {
+            $data['billplz_status'] = $this->request->post['billplz_status'];
+        } else {
+            $data['billplz_status'] = $this->config->get('billplz_status');
+        }
+
+        if (isset($this->request->post['billplz_sort_order'])) {
+            $data['billplz_sort_order'] = $this->request->post['billplz_sort_order'];
+        } else {
+            $data['billplz_sort_order'] = $this->config->get('billplz_sort_order');
+        }
+
+        $data['header'] = $this->load->controller('common/header');
+        $data['column_left'] = $this->load->controller('common/column_left');
+        $data['footer'] = $this->load->controller('common/footer');
+
+        $this->response->setOutput($this->load->view('payment/billplz.tpl', $data));
+    }
+
+    protected function validate()
+    {
+        if (!$this->user->hasPermission('modify', 'payment/billplz')) {
+            $this->error['warning'] = $this->language->get('error_permission');
+        }
+
+        if (!$this->request->post['billplz_api_key_value']) {
+            $this->error['api_key'] = $this->language->get('error_api_key');
+        }
+
+        if (!$this->request->post['billplz_x_signature_value']) {
+            $this->error['x_signature'] = $this->language->get('error_x_signature');
+        }
+
+        return !$this->error;
+    }
 }
